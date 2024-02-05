@@ -1,0 +1,64 @@
+version: "3.8"
+services:
+  directus:
+    image: directus/directus:10.8.3
+    container_name: directus
+    ports:
+      - 8055:8055
+    volumes:
+      - ./database:/database
+      - ./uploads:/uploads
+      - ./extensions:/extensions
+    environment:
+      KEY: "31a6cac6-0c13-455e-b263-9285a2ee21d3"
+      SECRET: "7d710b30-1af9-4872-8cba-8ecfa6bdf334"
+      ADMIN_EMAIL: "admin@example.com"
+      ADMIN_PASSWORD: "d1r3ctu5"
+      DB_CLIENT: "postgres"
+      DB_USER: "e73haTFDc"
+      DB_PASSWORD: "6KD6w9u4RCEHaTEbC0LlETZ9"
+      DB_HOST: "postgres"
+      DB_DATABASE: "directus"
+      DB_PORT: "5432"
+      WEBSOCKETS_ENABLED: true
+    networks:
+      my-network:
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: directus
+      POSTGRES_USER: e73haTFDc
+      POSTGRES_PASSWORD: 6KD6w9u4RCEHaTEbC0LlETZ9
+    networks:
+      my-network:
+
+  directus-backend-dev:
+    image: directus-backend-dev:0.1
+    container_name: directus-backend-dev
+    working_dir: /work
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: vscode
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/work:cached
+    # Overrides default command so things don't shut down after the process ends.
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    networks:
+      my-network:
+
+networks:
+  my-network:
+
+volumes:
+  postgres-data:
+    driver: local
+      
